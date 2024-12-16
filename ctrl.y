@@ -71,6 +71,10 @@ condition : e '<' e
           | FALSE
           ;
 
+ret : e 
+    | condition 
+  ;
+
 list_param : param
             | list_param ','  param 
             ;
@@ -95,6 +99,8 @@ function_list : /* epsilon */ //pentru functii care au doar return
               ;
 statement:  VAR ASSIGN e //atribuire
          | VAR '(' array_list')' //apelare functie
+         | VAR '(' array_list',' function_in_function ')' //apelare functie cu parametri functie
+         | VAR '(' function_in_function ')' //apelare functie doar cu parametru functie
          | VAR '('')' //apelare functie fara parametri
          | VAR '['']' ASSIGN '{' array_list '}' //atribuire array
          | VAR '[' NR ']' ASSIGN e //atribuire element al unui array
@@ -124,16 +130,16 @@ class_members : class_member
               ;
 
 class_member : TYPE VAR ';'  //declaratii           
-              | TYPE VAR '(' list_param ')' '{' function_list RETURN e ';' '}' //metode
-              | TYPE VAR '('')' '{' function_list RETURN e ';' '}' //metode fara parametri 
+              | TYPE VAR '(' list_param ')' '{' function_list RETURN ret ';' '}' //metode
+              | TYPE VAR '('')' '{' function_list RETURN ret ';' '}' //metode fara parametri
               | VAR '(' TYPE VAR ')' ';' //constructor
               | '#' VAR '('')'';' //destructor
               | PRIVACY':'
               ;
 
-functions : FUNCTION TYPE VAR '(' list_param ')' '{' function_list RETURN e ';' '}' 
-         | FUNCTION TYPE VAR '('')' '{' function_list RETURN e ';' '}' 
-         | FUNCTION TYPE VAR '(' list_param ',' function_in_function')' '{'  function_list RETURN e ';' '}' 
+functions : FUNCTION TYPE VAR '(' list_param ')' '{' function_list RETURN ret ';' '}' 
+         | FUNCTION TYPE VAR '('')' '{' function_list RETURN ret ';' '}' 
+         | FUNCTION TYPE VAR '(' list_param ',' function_in_function')' '{'  function_list RETURN ret ';' '}' 
          ;
 
 function_in_function : FUNCTION VAR '(' list_param ')'
