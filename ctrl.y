@@ -15,7 +15,7 @@ int errorCount = 0;
 }
 %left '+' '-'
 %left '*' '/' '%'
-%token  BGIN ASSIGN NR FLOAT CLASS FUNCTION RETURN WHILE IF ELSE FOR ENDWHILE THEN ENDFOR TRUE FALSE ENDIF PRINT TYPEOF NEW LEQ EQ GEQ NE
+%token  BGIN ASSIGN NR FLOAT CLASS FUNCTION RETURN WHILE IF ELSE FOR ENDWHILE THEN ENDFOR TRUE FALSE ENDIF PRINT TYPEOF NEW LEQ EQ GEQ NE OR AND
 %token<string> VAR TYPE PRIVACY
 %start progr
 %%
@@ -59,6 +59,12 @@ e : e '+' e
   | NR
   | VAR 
   | FLOAT
+  | VAR '.' VAR //proprietate obiect
+  | VAR '.' VAR '(' array_list ')' //metoda obiect
+  | VAR '.' VAR '(' ')' //metoda obiect fara parametri
+  | VAR '(' array_list ')' //apelare functie
+  | VAR '(' ')' //apelare functie fara parametri
+  | VAR '[' NR ']' //element array
   ;
 
 condition : e '<' e
@@ -70,6 +76,12 @@ condition : e '<' e
           | TRUE
           | FALSE
           ;
+
+expb : condition
+     | expb AND expb
+     | expb OR expb
+     | '!' expb
+     | '(' expb ')'
 
 ret : e 
     | condition 
@@ -104,10 +116,10 @@ statement:  VAR ASSIGN e //atribuire
          | VAR '('')' //apelare functie fara parametri
          | VAR '['']' ASSIGN '{' array_list '}' //atribuire array
          | VAR '[' NR ']' ASSIGN e //atribuire element al unui array
-         | IF '(' condition ')' THEN list ENDIF
-         | IF '(' condition ')' THEN list ELSE list ENDIF 
-         | WHILE '(' condition ')' list ENDWHILE 
-         | FOR '(' VAR ASSIGN e ';' condition ';' VAR ASSIGN e ')' list ENDFOR
+         | IF '(' expb ')' THEN list ENDIF
+         | IF '(' expb ')' THEN list ELSE list ENDIF 
+         | WHILE '(' expb ')' list ENDWHILE 
+         | FOR '(' VAR ASSIGN e ';' expb ';' VAR ASSIGN e ')' list ENDFOR
          | VAR VAR ASSIGN NEW VAR //instantiere obiect
          | VAR '.' VAR ASSIGN e //apelare camp
          | VAR '.' VAR '('array_list')' //apelare metoda cu parametri
